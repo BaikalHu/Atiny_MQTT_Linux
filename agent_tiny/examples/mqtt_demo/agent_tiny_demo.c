@@ -103,7 +103,7 @@ void message_cb(cloud_msg_t *msg)
     ATINY_LOG(LOG_DEBUG, "%.*s : %.*s", msg->uri_len, msg->uri, msg->payload_len,  (char *)msg->payload);
 }
 /*lint -e550*/
-void app_data_report(void)
+void* app_data_report(void *param)
 {
     cloud_msg_t report_data;
     int ret;
@@ -124,12 +124,13 @@ void app_data_report(void)
         ATINY_LOG(LOG_DEBUG, "report ret:%d", ret);
         sleep(10);
     }
+    return NULL;
 }
 /*lint +e550*/
 
 uint32_t creat_report_task()
 {
-	pthread_t tidp;
+    pthread_t tidp;
 
     if ((pthread_create(&tidp, NULL, app_data_report, NULL)) == -1)
     {
@@ -140,7 +141,7 @@ uint32_t creat_report_task()
 	return 0;
 }
 
-void agent_tiny_entry(void)
+void* agent_tiny_entry(void *param)
 {
     uint32_t uwRet = 0;
     atiny_param_t *atiny_params;
@@ -174,15 +175,15 @@ void agent_tiny_entry(void)
 
     if(ATINY_OK != atiny_init(atiny_params, &g_phandle))
     {
-        return;
+        return NULL;
     }
 
     uwRet = creat_report_task();
     if(0 != uwRet)
     {
-        return;
+        return NULL;
     }
 
     (void)atiny_bind(device_info, g_phandle);
-    return ;
+    return NULL;
 }

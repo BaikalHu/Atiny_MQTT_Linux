@@ -2,11 +2,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
+#include "agent_tiny_demo.h"
 
 int main()
 {
     pthread_t tidp;
-    extern void agent_tiny_entry(void);
 
     if ((pthread_create(&tidp, NULL, agent_tiny_entry, NULL)) == -1)
     {

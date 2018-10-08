@@ -39,6 +39,6 @@
 //#include "agenttiny.h"
 #include "atiny_adapter.h"
 
-void agent_tiny_entry(void);
+void* agent_tiny_entry(void *);
 
 #endif 

@@ -128,7 +128,6 @@ void NetworkInit(Network *n)
 
 int NetworkConnect(Network *n, char *addr, int port)
 {
-    int fd;
     mqtt_context_t *ctx = NULL;
     int type = SOCK_STREAM;
     struct sockaddr_in address;
