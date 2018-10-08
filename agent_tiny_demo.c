@@ -103,7 +103,7 @@ void message_cb(cloud_msg_t *msg)
     ATINY_LOG(LOG_DEBUG, "%.*s : %.*s", msg->uri_len, msg->uri, msg->payload_len,  (char *)msg->payload);
 }
 /*lint -e550*/
-void* app_data_report(void *param)
+void *app_data_report(void *param)
 {
     cloud_msg_t report_data;
     int ret;
@@ -177,7 +177,6 @@ void* agent_tiny_entry(void *param)
     {
         return NULL;
     }
-
     uwRet = creat_report_task();
     if(0 != uwRet)
     {

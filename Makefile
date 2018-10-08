@@ -65,26 +65,10 @@ BUILD_DIR = build
 #        C_SOURCES += $(MBEDTLS_PORT_SRC)
 
 
-ATINY_LOG_SRC = \
-        ${wildcard $(TOP_DIR)/agent_tiny/lwm2m_client/atiny_log.c}
-        C_SOURCES += $(ATINY_LOG_SRC)
 
-MQTT_SRC = \
-        ${wildcard $(TOP_DIR)/paho.mqtt.embedded-c-1.1.0/MQTTPacket/src/*.c} \
-        $(TOP_DIR)/paho.mqtt.embedded-c-1.1.0/MQTTClient-C/src/MQTTClient.c \
-        $(TOP_DIR)/paho.mqtt.embedded-c-1.1.0/MQTTClient-C/src/linux/MQTTLinux.c
-        C_SOURCES += $(MQTT_SRC)
-
-OS_ADAPTER_SRC = \
-        ${wildcard $(TOP_DIR)/agent_tiny/osadapter/*.c}
-        C_SOURCES += $(OS_ADAPTER_SRC)
-
-ATINY_TINY_SRC = \
-        ${wildcard $(TOP_DIR)/agent_tiny/mqtt_client/*.c}
-        C_SOURCES += $(ATINY_TINY_SRC)
 
 AGENT_DEMO_SRC = \
-        ${wildcard $(TOP_DIR)/agent_tiny/examples/mqtt_demo/*.c}
+        $(TOP_DIR)/agent_tiny_demo.c
         C_SOURCES += $(AGENT_DEMO_SRC)
 
 USER_SRC =  \
@@ -141,37 +125,12 @@ AS_INCLUDES =
 # C includes
 
 
-#MBEDTLS_INC = \
-        -I $(TOP_DIR)/components/security/mbedtls/mbedtls-2.6.0/include \
-        -I $(TOP_DIR)/components/security/mbedtls/mbedtls-2.6.0/include/mbedtls
-#        C_INCLUDES += $(MBEDTLS_INC)
-
-#MBEDTLS_PORT_INC = \
-        -I $(TOP_DIR)/components/security/mbedtls/mbedtls_port
-#        C_INCLUDES += $(MBEDTLS_PORT_INC)
 
 
 
-MQTT_INC = \
-	-I $(TOP_DIR)/paho.mqtt.embedded-c-1.1.0/MQTTPacket/src \
-        -I $(TOP_DIR)/paho.mqtt.embedded-c-1.1.0/MQTTClient-C/src/linux \
-        -I $(TOP_DIR)/paho.mqtt.embedded-c-1.1.0/MQTTClient-C/src
-        C_INCLUDES += $(MQTT_INC)
 
-OS_ADAPTER_INC = \
-        -I $(TOP_DIR)/agent_tiny/osadapter
-        C_INCLUDES += $(OS_ADAPTER_INC)
+C_INCLUDES += -I ./include/
 
-	#-I $(TOP_DIR)/agent_tiny/lwm2m_client \
-
-ATINY_TINY_INC = \
-	-I $(TOP_DIR)/agent_tiny/mqtt_client \
-        -I $(TOP_DIR)/agent_tiny/comm/include
-        C_INCLUDES += $(ATINY_TINY_INC)
-
-AGENT_DEMO_INC = \
-        -I $(TOP_DIR)/agent_tiny/examples/mqtt_demo
-        C_INCLUDES += $(AGENT_DEMO_INC)
 
 
 
@@ -195,8 +154,8 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)"
 # link script
 
 # libraries
-LIBS = -lc -lm -lpthread
-LIBDIR =
+LIBS = -lc -lm -lpthread -lAtiny_MQTT
+LIBDIR = -L .
 LDFLAGS = $(MCU) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
 # default action: build all
