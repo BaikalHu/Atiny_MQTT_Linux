@@ -172,18 +172,16 @@ void agent_tiny_entry(void)
     atiny_params->security_type = CLOUD_SECURITY_TYPE_NONE;
 #endif /* WITH_DTLS */
 
-printf("11\n");
     if(ATINY_OK != atiny_init(atiny_params, &g_phandle))
     {
         return;
     }
-printf("22\n");
+
     uwRet = creat_report_task();
     if(0 != uwRet)
     {
         return;
     }
-	printf("33\n");
 
     (void)atiny_bind(device_info, g_phandle);
     return ;

@@ -35,12 +35,9 @@ static int sendPacket(MQTTClient *c, int length, Timer *timer)
 {
     int rc = FAILURE,
         sent = 0;
-printf("11\n");
     while (sent < length && !TimerIsExpired(timer))
     {
-printf("22\n");
         rc = c->ipstack->mqttwrite(c->ipstack, &c->buf[sent], length, TimerLeftMS(timer));
-printf("33\n");
         if (rc < 0)  // there was an error writing the data
             break;
         sent += rc;
@@ -579,35 +576,28 @@ int MQTTConnectWithResults(MQTTClient *c, MQTTPacket_connectData *options, MQTTC
     int rc = FAILURE;
     MQTTPacket_connectData default_options = MQTTPacket_connectData_initializer;
     int len = 0;
-printf("a\n");
 #if defined(MQTT_TASK)
     MutexLock(&c->mutex);
 #elif defined(__MQTT_LITE_OS__)
     if(c->mutex) atiny_mutex_lock(c->mutex);
 #endif
-printf("b\n");
     if (c->isconnected) /* don't send connect packet again if we are already connected */
         goto exit;
 
     TimerInit(&connect_timer);
     TimerCountdownMS(&connect_timer, c->command_timeout_ms);
 
-printf("c\n");
     if (options == 0)
         options = &default_options; /* set default options if none were supplied */
 
     c->keepAliveInterval = options->keepAliveInterval;
     c->cleansession = options->cleansession;
-printf("c1\n");
     TimerCountdown(&c->last_received, c->keepAliveInterval);
-printf("c2\n");
     if ((len = MQTTSerialize_connect(c->buf, c->buf_size, options)) <= 0)
         goto exit;
-printf("c3\n");
     if ((rc = sendPacket(c, len, &connect_timer)) != MQTT_SUCCESS)  // send the connect packet
         goto exit; // there was a problem
 
-printf("d\n");
     // this will be a blocking call, wait for the connack
     if (waitfor(c, CONNACK, &connect_timer) == CONNACK)
     {
@@ -621,7 +611,6 @@ printf("d\n");
     else
         rc = FAILURE;
 
-printf("e\n");
 exit:
     if (rc == MQTT_SUCCESS)
     {

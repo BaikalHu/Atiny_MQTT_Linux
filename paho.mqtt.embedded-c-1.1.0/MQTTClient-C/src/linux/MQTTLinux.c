@@ -105,20 +105,14 @@ int linux_write(Network *n, unsigned char *buffer, int len, int timeout_ms)
     struct timeval tv;
     void *ctx;
     int fd;
-printf("w1\n");
     ctx = n->ctx;
-printf("w11\n");
     fd = ((mqtt_context_t *)ctx)->fd;
 
-printf("w2\n");
     tv.tv_sec = 0;  /* 30 Secs Timeout */
     tv.tv_usec = timeout_ms * 1000;  // Not init'ing this can cause strange errors
 
-printf("w3\n");
     setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, (char *)&tv, sizeof(struct timeval));
-printf("w4\n");
     int	rc = write(fd, buffer, len);
-printf("w5\n");
     return rc;
 }
 
