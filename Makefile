@@ -55,18 +55,6 @@ BUILD_DIR = build
 
 
 
-
-#MBEDTLS_SRC = \
-        ${wildcard $(TOP_DIR)/components/security/mbedtls/mbedtls-2.6.0/library/*.c}
-#        C_SOURCES += $(MBEDTLS_SRC)
-
-#MBEDTLS_PORT_SRC = \
-        ${wildcard $(TOP_DIR)/components/security/mbedtls/mbedtls_port/*.c}
-#        C_SOURCES += $(MBEDTLS_PORT_SRC)
-
-
-
-
 AGENT_DEMO_SRC = \
         $(TOP_DIR)/agent_tiny_demo.c
         C_SOURCES += $(AGENT_DEMO_SRC)
@@ -105,29 +93,11 @@ C_DEFS =  \
         -D LWM2M_CLIENT_MODE \
    	-D ATINY_DEBUG 
 
-#	-D MBEDTLS_DEBUG_C \
-        -D USE_MBED_TLS \
-#-D WITH_DTLS  \
-        -D WITH_CA
-
-	#-D MBEDTLS_X509_CRT_PARSE_C \
-	-D MBEDTLS_X509_USE_C \
-        #-D NDEBUG \
-       # -D WITH_DTLS \
-	-D WITH_CA \
-	-D MBEDTLS_X509_CRT_PARSE_C \
-	-D MBEDTLS_X509_USE_C \
-       # -D WITH_DTLS 
 
 # AS includes
 AS_INCLUDES =
 
 # C includes
-
-
-
-
-
 
 C_INCLUDES += -I ./include/
 
