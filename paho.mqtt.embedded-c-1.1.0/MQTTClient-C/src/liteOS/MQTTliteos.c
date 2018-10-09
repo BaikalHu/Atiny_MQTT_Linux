@@ -32,7 +32,7 @@
  * applicable export control laws and regulations.
  *---------------------------------------------------------------------------*/
 
-#if 0
+#if WITH_DTLS
 #include "mbedtls/net_sockets.h"
 #include "mbedtls/ssl.h"
 #include "mbedtls/entropy.h"
@@ -610,80 +610,80 @@ exit:
 
 static int los_mqtt_tls_ca_connect(Network *n, char *addr, int port)
 {
-	int ret;
-	mbedtls_net_context *server_fd;
-	mbedtls_ssl_context *ssl;
-	mbedtls_ssl_config *conf;
-	mbedtls_entropy_context *entropy;
-	mbedtls_ctr_drbg_context *ctr_drbg;
+    int ret;
+    mbedtls_net_context *server_fd;
+    mbedtls_ssl_context *ssl;
+    mbedtls_ssl_config *conf;
+    mbedtls_entropy_context *entropy;
+    mbedtls_ctr_drbg_context *ctr_drbg;
     mbedtls_x509_crt *cacert;
     mbedtls_timing_delay_context *timer;
-	
-	char port_str[16] = {0};
-	const char *pers = "mqtt_client";
 
-	if(NULL == n || NULL == addr)
-	{
-		ATINY_LOG(LOG_FATAL, "invalid params.");
-		return -1;
-	}
+    char port_str[16] = {0};
+    const char *pers = "mqtt_client";
 
-	(void)mbedtls_platform_set_calloc_free(atiny_calloc, atiny_free);
-	(void)mbedtls_platform_set_snprintf(atiny_snprintf);
-	(void)mbedtls_platform_set_printf(atiny_printf);
+    if(NULL == n || NULL == addr)
+    {
+        ATINY_LOG(LOG_FATAL, "invalid params.");
+        return -1;
+    }
 
-	ssl 	  = mbedtls_calloc(1, sizeof(mbedtls_ssl_context));
-	conf	  = mbedtls_calloc(1, sizeof(mbedtls_ssl_config));
-	entropy   = mbedtls_calloc(1, sizeof(mbedtls_entropy_context));
-	ctr_drbg  = mbedtls_calloc(1, sizeof(mbedtls_ctr_drbg_context));
-	server_fd = mbedtls_calloc(1, sizeof(mbedtls_net_context));
-	cacert    = mbedtls_calloc(1, sizeof(mbedtls_x509_crt));
-	timer     = mbedtls_calloc(1, sizeof(mbedtls_timing_delay_context));
+    (void)mbedtls_platform_set_calloc_free(atiny_calloc, atiny_free);
+    (void)mbedtls_platform_set_snprintf(atiny_snprintf);
+    (void)mbedtls_platform_set_printf(atiny_printf);
 
-	if (NULL == ssl || NULL == conf || entropy == NULL ||
-			NULL == ctr_drbg || NULL == server_fd ||
-			NULL == cacert || NULL == timer)
-	{
-		goto exit;
-	}
+    ssl       = mbedtls_calloc(1, sizeof(mbedtls_ssl_context));
+    conf      = mbedtls_calloc(1, sizeof(mbedtls_ssl_config));
+    entropy   = mbedtls_calloc(1, sizeof(mbedtls_entropy_context));
+    ctr_drbg  = mbedtls_calloc(1, sizeof(mbedtls_ctr_drbg_context));
+    server_fd = mbedtls_calloc(1, sizeof(mbedtls_net_context));
+    cacert    = mbedtls_calloc(1, sizeof(mbedtls_x509_crt));
+    timer     = mbedtls_calloc(1, sizeof(mbedtls_timing_delay_context));
 
-	mbedtls_debug_set_threshold(100);
+    if (NULL == ssl || NULL == conf || entropy == NULL ||
+            NULL == ctr_drbg || NULL == server_fd ||
+            NULL == cacert || NULL == timer)
+    {
+        goto exit;
+    }
 
-	/*
-	 * 0. Initialize the RNG and the session data
-	 */
+    mbedtls_debug_set_threshold(100);
+
+    /*
+     * 0. Initialize the RNG and the session data
+     */
     mbedtls_net_init(server_fd);
-	mbedtls_ssl_init(ssl);
-	mbedtls_ssl_config_init(conf);
-	mbedtls_x509_crt_init(cacert);
-	mbedtls_ctr_drbg_init(ctr_drbg);
- 	
-	ATINY_LOG(LOG_DEBUG, "\n  . Seeding the random number generator...");
+    mbedtls_ssl_init(ssl);
+    mbedtls_ssl_config_init(conf);
+    mbedtls_x509_crt_init(cacert);
+    mbedtls_ctr_drbg_init(ctr_drbg);
 
-	mbedtls_entropy_init(entropy);
-	if( ( ret = mbedtls_ctr_drbg_seed(ctr_drbg, mbedtls_entropy_func, entropy,
-									  (const unsigned char *) pers,
-									  strlen( pers ) ) ) != 0 )
-	{
-		ATINY_LOG(LOG_ERR, "failed\n  ! mbedtls_ctr_drbg_seed returned %d\n", ret);
-		goto exit;
-	}
+    ATINY_LOG(LOG_DEBUG, "\n  . Seeding the random number generator...");
+
+    mbedtls_entropy_init(entropy);
+    if( ( ret = mbedtls_ctr_drbg_seed(ctr_drbg, mbedtls_entropy_func, entropy,
+                                      (const unsigned char *) pers,
+                                      strlen( pers ) ) ) != 0 )
+    {
+        ATINY_LOG(LOG_ERR, "failed\n  ! mbedtls_ctr_drbg_seed returned %d\n", ret);
+        goto exit;
+    }
 
 
     /*
      * 1. Initialize certificates
      */
-	ATINY_LOG(LOG_DEBUG, "  . Loading the CA root certificate ...");
-	printf("ca:\n\n %s\n\n", n->ca.ca_crt);
-	
-	extern const char	mqtt_test_cas_pem[];
-	extern const size_t mqtt_test_cas_pem_len;
-	printf("size:%d %d\n",strlen(n->ca.ca_crt), mqtt_test_cas_pem_len);
-	
+    ATINY_LOG(LOG_DEBUG, "  . Loading the CA root certificate ...");
+    printf("ca:\n\n %s\n\n", n->ca.ca_crt);
+
+    extern const char    mqtt_test_cas_pem[];
+    extern const size_t mqtt_test_cas_pem_len;
+    printf("size:%d %d\n",strlen(n->ca.ca_crt), mqtt_test_cas_pem_len);
+
     ret = mbedtls_x509_crt_parse(cacert, \
                                  (const unsigned char *) mqtt_test_cas_pem, \
                                  mqtt_test_cas_pem_len );
-	
+
     ATINY_LOG(LOG_DEBUG, \
                         "cacert version:%d\n", \
                         cacert->version);
@@ -699,49 +699,49 @@ static int los_mqtt_tls_ca_connect(Network *n, char *addr, int port)
         goto exit;
     }
 
-	(void)atiny_snprintf(port_str, sizeof(port_str) - 1, "%d", port);
-	if( ( ret = mbedtls_mqtt_connect(server_fd, addr, port_str, MBEDTLS_NET_PROTO_TCP) ) != 0 )
-	{
-		ATINY_LOG(LOG_ERR, "mbedtls_net_connect failed.");
-		goto exit;
-	}
-	ATINY_LOG(LOG_DEBUG, "mbedtls_net_connect success");
-	n->ctx = (void *)ssl;
+    (void)atiny_snprintf(port_str, sizeof(port_str) - 1, "%d", port);
+    if( ( ret = mbedtls_mqtt_connect(server_fd, addr, port_str, MBEDTLS_NET_PROTO_TCP) ) != 0 )
+    {
+        ATINY_LOG(LOG_ERR, "mbedtls_net_connect failed.");
+        goto exit;
+    }
+    ATINY_LOG(LOG_DEBUG, "mbedtls_net_connect success");
+    n->ctx = (void *)ssl;
 
 #if 1
-	ret = mbedtls_net_set_block( server_fd );
-	if( ret != 0 )
-	{
-		ATINY_LOG(LOG_ERR, " failed\n  ! net_set_(non)block() returned -0x%x", -ret );
-		goto exit;
-	}
+    ret = mbedtls_net_set_block( server_fd );
+    if( ret != 0 )
+    {
+        ATINY_LOG(LOG_ERR, " failed\n  ! net_set_(non)block() returned -0x%x", -ret );
+        goto exit;
+    }
 #endif
-	
+
     /*
      * 2. Setup stuff
      */
-	ATINY_LOG(LOG_DEBUG, "  . Setting up the DTLS structure..." );
-	if( ( ret = mbedtls_ssl_config_defaults(conf,
-											MBEDTLS_SSL_IS_CLIENT,
-											MBEDTLS_SSL_TRANSPORT_STREAM,
-											MBEDTLS_SSL_PRESET_DEFAULT ) ) != 0 )
-	{
-		ATINY_LOG(LOG_ERR, " failed\n  ! mbedtls_ssl_config_defaults returned -0x%x", -ret );
-		goto exit;
-	}
+    ATINY_LOG(LOG_DEBUG, "  . Setting up the DTLS structure..." );
+    if( ( ret = mbedtls_ssl_config_defaults(conf,
+                                            MBEDTLS_SSL_IS_CLIENT,
+                                            MBEDTLS_SSL_TRANSPORT_STREAM,
+                                            MBEDTLS_SSL_PRESET_DEFAULT ) ) != 0 )
+    {
+        ATINY_LOG(LOG_ERR, " failed\n  ! mbedtls_ssl_config_defaults returned -0x%x", -ret );
+        goto exit;
+    }
 
-	mbedtls_ssl_conf_authmode( conf, MBEDTLS_SSL_VERIFY_REQUIRED );
-	mbedtls_ssl_conf_ca_chain( conf, cacert, NULL );
-	mbedtls_ssl_conf_rng( conf, mbedtls_ctr_drbg_random, ctr_drbg );
-	mbedtls_ssl_conf_dbg( conf, my_debug, stdout );
+    mbedtls_ssl_conf_authmode( conf, MBEDTLS_SSL_VERIFY_REQUIRED );
+    mbedtls_ssl_conf_ca_chain( conf, cacert, NULL );
+    mbedtls_ssl_conf_rng( conf, mbedtls_ctr_drbg_random, ctr_drbg );
+    mbedtls_ssl_conf_dbg( conf, my_debug, stdout );
 
-	mbedtls_ssl_conf_read_timeout( conf, 100 );
+    mbedtls_ssl_conf_read_timeout( conf, 100 );
 
-	if( ( ret = mbedtls_ssl_setup( ssl, conf ) ) != 0 )
-	{
-		ATINY_LOG(LOG_ERR, " failed\n  ! mbedtls_ssl_setup returned -0x%x", -ret );
-		goto exit;
-	}
+    if( ( ret = mbedtls_ssl_setup( ssl, conf ) ) != 0 )
+    {
+        ATINY_LOG(LOG_ERR, " failed\n  ! mbedtls_ssl_setup returned -0x%x", -ret );
+        goto exit;
+    }
 
     if( ( ret = mbedtls_ssl_set_hostname( ssl, "ubuntu" ) ) != 0 )
     {
@@ -752,88 +752,88 @@ static int los_mqtt_tls_ca_connect(Network *n, char *addr, int port)
         goto exit;
     }
 
-	mbedtls_ssl_set_bio( ssl, server_fd, mbedtls_net_send, mbedtls_net_recv,
-						 mbedtls_net_recv_timeout);
+    mbedtls_ssl_set_bio( ssl, server_fd, mbedtls_net_send, mbedtls_net_recv,
+                         mbedtls_net_recv_timeout);
 
 #if 0
-	mbedtls_ssl_set_timer_cb(ssl, 
-						  timer, 
-						  mbedtls_timing_set_delay,
-						  mbedtls_timing_get_delay );
+    mbedtls_ssl_set_timer_cb(ssl,
+                          timer,
+                          mbedtls_timing_set_delay,
+                          mbedtls_timing_get_delay );
 #endif
-	/*
-	 * 3. Handshake
-	 */
-	ATINY_LOG(LOG_DEBUG,"  . Performing the SSL/TLS handshake...");
-	while( ( ret = mbedtls_ssl_handshake( ssl ) ) != 0 )
-	{
-		if( ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE
-				&& ret != MBEDTLS_ERR_SSL_TIMEOUT)
-		{
-			ATINY_LOG(LOG_ERR, " failed\n  ! mbedtls_ssl_handshake returned -0x%x", -ret );
-			goto exit;
-		}
-	}
+    /*
+     * 3. Handshake
+     */
+    ATINY_LOG(LOG_DEBUG,"  . Performing the SSL/TLS handshake...");
+    while( ( ret = mbedtls_ssl_handshake( ssl ) ) != 0 )
+    {
+        if( ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE
+                && ret != MBEDTLS_ERR_SSL_TIMEOUT)
+        {
+            ATINY_LOG(LOG_ERR, " failed\n  ! mbedtls_ssl_handshake returned -0x%x", -ret );
+            goto exit;
+        }
+    }
 
-	/*
+    /*
      * 4. Verify the server certificate
      */
     ATINY_LOG(LOG_DEBUG, " . Verifying peer X.509 certificate...");
-	if( ( ret = mbedtls_ssl_get_verify_result( ssl ) ) != 0 )
-	{
-		char vrfy_buf[512];
+    if( ( ret = mbedtls_ssl_get_verify_result( ssl ) ) != 0 )
+    {
+        char vrfy_buf[512];
 
-		ATINY_LOG(LOG_ERR, " failed\n" );
+        ATINY_LOG(LOG_ERR, " failed\n" );
 
-		mbedtls_x509_crt_verify_info(vrfy_buf, \
-									 sizeof( vrfy_buf ), \
-									 "	! ", \
-									 ret );
+        mbedtls_x509_crt_verify_info(vrfy_buf, \
+                                     sizeof( vrfy_buf ), \
+                                     "    ! ", \
+                                     ret );
 
-		ATINY_LOG(LOG_ERR, "%s\n", vrfy_buf );
-	}
-	else
-		ATINY_LOG(LOG_INFO, "ok\n");
-	return 0;
+        ATINY_LOG(LOG_ERR, "%s\n", vrfy_buf );
+    }
+    else
+        ATINY_LOG(LOG_INFO, "ok\n");
+    return 0;
 exit:
-	if (conf)
-	{
-		mbedtls_ssl_config_free(conf);
-		mbedtls_free(conf);
-	}
+    if (conf)
+    {
+        mbedtls_ssl_config_free(conf);
+        mbedtls_free(conf);
+    }
 
-	if (ctr_drbg)
-	{
-		mbedtls_ctr_drbg_free(ctr_drbg);
-		mbedtls_free(ctr_drbg);
-	}
+    if (ctr_drbg)
+    {
+        mbedtls_ctr_drbg_free(ctr_drbg);
+        mbedtls_free(ctr_drbg);
+    }
 
-	if (entropy)
-	{
-		mbedtls_entropy_free(entropy);
-		mbedtls_free(entropy);
-	}
+    if (entropy)
+    {
+        mbedtls_entropy_free(entropy);
+        mbedtls_free(entropy);
+    }
 
-	if (ssl)
-	{
-		mbedtls_ssl_free(ssl);
-		mbedtls_free(ssl);
-	}
-	if(server_fd)
-	{
-		mbedtls_free(server_fd);
-	}
-	if(cacert)
-	{
-		mbedtls_free(cacert);
-	}
-	if(timer)
-	{
-		mbedtls_free(timer);
-	}
-	
-	n->ctx = (void *)NULL;
-	return -1;
+    if (ssl)
+    {
+        mbedtls_ssl_free(ssl);
+        mbedtls_free(ssl);
+    }
+    if(server_fd)
+    {
+        mbedtls_free(server_fd);
+    }
+    if(cacert)
+    {
+        mbedtls_free(cacert);
+    }
+    if(timer)
+    {
+        mbedtls_free(timer);
+    }
+
+    n->ctx = (void *)NULL;
+    return -1;
 }
 
 
@@ -857,9 +857,9 @@ int NetworkConnect(Network *n, char *addr, int port)
     case MQTT_PROTO_TLS_PSK:
         ret = los_mqtt_tls_connect(n, addr, port);
         break;
-	case MQTT_PROTO_TLS_CA:
-		ret = los_mqtt_tls_ca_connect(n, addr, port);
-		break;
+    case MQTT_PROTO_TLS_CA:
+        ret = los_mqtt_tls_ca_connect(n, addr, port);
+        break;
     default :
         ATINY_LOG(LOG_WARNING, "unknow proto : %d\n", n->proto);
         break;

@@ -45,6 +45,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
+#include "atiny_log.h"
 
 typedef struct Timer
 {

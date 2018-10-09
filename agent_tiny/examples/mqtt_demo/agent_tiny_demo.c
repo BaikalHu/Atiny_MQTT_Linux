@@ -39,7 +39,7 @@
 
 void message_cb(cloud_msg_t *msg);
 
-#define DEFAULT_SERVER_IPV4  "192.168.91.131"   //"192.168.0.100"
+#define DEFAULT_SERVER_IPV4  "127.0.0.1" //"192.168.91.131"   //"192.168.0.100"
 #ifdef WITH_DTLS
 #define DEFAULT_SERVER_PORT "8883"
 #define AGENT_TINY_DEMO_PSK_ID "testID"
@@ -50,28 +50,28 @@ unsigned char g_demo_psk[AGENT_TINY_DEMO_PSK_LEN] = {0xab, 0xcd, 0xef};
 #endif /* WITH_DTLS */
 
 #if 1//def WITH_CA
-#define MQTT_TEST_CA_CRT	\
-"-----BEGIN CERTIFICATE-----\r\n"	\
-"MIIDpzCCAo+gAwIBAgIJALx8oSCBKiPDMA0GCSqGSIb3DQEBDQUAMGoxFzAVBgNV\r\n"	\
-"BAMMDkFuIE1RVFQgYnJva2VyMRYwFAYDVQQKDA1Pd25UcmFja3Mub3JnMRQwEgYD\r\n"	\
-"VQQLDAtnZW5lcmF0ZS1DQTEhMB8GCSqGSIb3DQEJARYSbm9ib2R5QGV4YW1wbGUu\r\n"	\
-"bmV0MB4XDTE4MDkyODExNDkxNloXDTMyMDkyNDExNDkxNlowajEXMBUGA1UEAwwO\r\n"	\
-"QW4gTVFUVCBicm9rZXIxFjAUBgNVBAoMDU93blRyYWNrcy5vcmcxFDASBgNVBAsM\r\n"	\
-"C2dlbmVyYXRlLUNBMSEwHwYJKoZIhvcNAQkBFhJub2JvZHlAZXhhbXBsZS5uZXQw\r\n"	\
-"ggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDKCVvzZHV1IKD3tI8+MW/4\r\n"	\
-"78WTO+2zZLMVnHC3RiZtOSV5Efr4H+OA6qduLDPlZlM7FIYyFi4NzSucySbDXVwm\r\n"	\
-"7WjmmiNQUJM1EJELmc12uD1ZdRjVarc8DxU0IfBMtjHepmCuzyNx1OO7sY2TCdMY\r\n"	\
-"Jfa7yBLe4IL2HyY3u4c+yqIMT8W6dAXpJFJKMLBnIPbA39aUOdJzwPS5JaWSNhfh\r\n"	\
-"/BD4RoA9WeO+Svio9aoiIeUM6VtRhshclJgFZr2agCK4aIVIzGWlH0MBJWk8vwwZ\r\n"	\
-"dWzucyeKG8vSh9+hatZGq+841iyA3e/wf2iK3O4SB8pyxebJsthdsHjlEtTUBozd\r\n"	\
-"AgMBAAGjUDBOMB0GA1UdDgQWBBQyjKwJ4JSahePGi0GfAZc1/CkxjTAfBgNVHSME\r\n"	\
-"GDAWgBQyjKwJ4JSahePGi0GfAZc1/CkxjTAMBgNVHRMEBTADAQH/MA0GCSqGSIb3\r\n"	\
-"DQEBDQUAA4IBAQB7/7mBgw3FSY6VwiDUxUrAoUX8Fi5uOIWwt9GFxAZ17MaWOZZY\r\n"	\
-"tJ/ZjnAfBN/lMvZCRUKbv4G/0CcIsPABSQLdIoJtsamtcCnvwvmAmc/3PNF+QXpn\r\n"	\
-"R/YJzQIU9VkJztYgNDymff+mmEFdIBYnQ8P/L+cT36fsCQmXWYb5wc4ki4Tb3gAr\r\n"	\
-"WHpbu+7AziW9wsM0GAOwFHkcn2eZExc0DjxHAfA+cXV1RV7Nr6J8SHkxmGg4b1oj\r\n"	\
-"0CJRiXANM1CdAv5hMCznDaK4diOfnWJogN0neR5VeWmsYyTogr88s3u9B5Ogc2cm\r\n"	\
-"4ee/Pwp8Tdn7vmqhGvkrTLDwIbD69HWPFWLN\r\n"								\
+#define MQTT_TEST_CA_CRT    \
+"-----BEGIN CERTIFICATE-----\r\n"    \
+"MIIDpzCCAo+gAwIBAgIJALx8oSCBKiPDMA0GCSqGSIb3DQEBDQUAMGoxFzAVBgNV\r\n"    \
+"BAMMDkFuIE1RVFQgYnJva2VyMRYwFAYDVQQKDA1Pd25UcmFja3Mub3JnMRQwEgYD\r\n"    \
+"VQQLDAtnZW5lcmF0ZS1DQTEhMB8GCSqGSIb3DQEJARYSbm9ib2R5QGV4YW1wbGUu\r\n"    \
+"bmV0MB4XDTE4MDkyODExNDkxNloXDTMyMDkyNDExNDkxNlowajEXMBUGA1UEAwwO\r\n"    \
+"QW4gTVFUVCBicm9rZXIxFjAUBgNVBAoMDU93blRyYWNrcy5vcmcxFDASBgNVBAsM\r\n"    \
+"C2dlbmVyYXRlLUNBMSEwHwYJKoZIhvcNAQkBFhJub2JvZHlAZXhhbXBsZS5uZXQw\r\n"    \
+"ggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDKCVvzZHV1IKD3tI8+MW/4\r\n"    \
+"78WTO+2zZLMVnHC3RiZtOSV5Efr4H+OA6qduLDPlZlM7FIYyFi4NzSucySbDXVwm\r\n"    \
+"7WjmmiNQUJM1EJELmc12uD1ZdRjVarc8DxU0IfBMtjHepmCuzyNx1OO7sY2TCdMY\r\n"    \
+"Jfa7yBLe4IL2HyY3u4c+yqIMT8W6dAXpJFJKMLBnIPbA39aUOdJzwPS5JaWSNhfh\r\n"    \
+"/BD4RoA9WeO+Svio9aoiIeUM6VtRhshclJgFZr2agCK4aIVIzGWlH0MBJWk8vwwZ\r\n"    \
+"dWzucyeKG8vSh9+hatZGq+841iyA3e/wf2iK3O4SB8pyxebJsthdsHjlEtTUBozd\r\n"    \
+"AgMBAAGjUDBOMB0GA1UdDgQWBBQyjKwJ4JSahePGi0GfAZc1/CkxjTAfBgNVHSME\r\n"    \
+"GDAWgBQyjKwJ4JSahePGi0GfAZc1/CkxjTAMBgNVHRMEBTADAQH/MA0GCSqGSIb3\r\n"    \
+"DQEBDQUAA4IBAQB7/7mBgw3FSY6VwiDUxUrAoUX8Fi5uOIWwt9GFxAZ17MaWOZZY\r\n"    \
+"tJ/ZjnAfBN/lMvZCRUKbv4G/0CcIsPABSQLdIoJtsamtcCnvwvmAmc/3PNF+QXpn\r\n"    \
+"R/YJzQIU9VkJztYgNDymff+mmEFdIBYnQ8P/L+cT36fsCQmXWYb5wc4ki4Tb3gAr\r\n"    \
+"WHpbu+7AziW9wsM0GAOwFHkcn2eZExc0DjxHAfA+cXV1RV7Nr6J8SHkxmGg4b1oj\r\n"    \
+"0CJRiXANM1CdAv5hMCznDaK4diOfnWJogN0neR5VeWmsYyTogr88s3u9B5Ogc2cm\r\n"    \
+"4ee/Pwp8Tdn7vmqhGvkrTLDwIbD69HWPFWLN\r\n"                                \
 "-----END CERTIFICATE-----\r\n"
 const char mqtt_test_cas_pem[] = MQTT_TEST_CA_CRT;
 const size_t mqtt_test_cas_pem_len = sizeof(mqtt_test_cas_pem);
@@ -137,8 +137,8 @@ uint32_t creat_report_task()
         printf("create error!\n");
         return 1;
     }
-	
-	return 0;
+    
+    return 0;
 }
 
 void* agent_tiny_entry(void *param)
@@ -163,12 +163,12 @@ void* agent_tiny_entry(void *param)
     atiny_params->u.psk.psk_id_len = strlen(AGENT_TINY_DEMO_PSK_ID);
     atiny_params->u.psk.psk = g_demo_psk;
     atiny_params->u.psk.psk_len = AGENT_TINY_DEMO_PSK_LEN;
-	#ifdef WITH_CA
-	atiny_params->security_type = CLOUD_SECURITY_TYPE_CA;
-	atiny_params->u.ca.ca_crt = MQTT_TEST_CA_CRT;
-	atiny_params->u.ca.server_crt = NULL;
-	atiny_params->u.ca.server_key = NULL;
-	#endif
+#ifdef WITH_CA
+    atiny_params->security_type = CLOUD_SECURITY_TYPE_CA;
+    atiny_params->u.ca.ca_crt = MQTT_TEST_CA_CRT;
+    atiny_params->u.ca.server_crt = NULL;
+    atiny_params->u.ca.server_key = NULL;
+#endif
 #else
     atiny_params->security_type = CLOUD_SECURITY_TYPE_NONE;
 #endif /* WITH_DTLS */

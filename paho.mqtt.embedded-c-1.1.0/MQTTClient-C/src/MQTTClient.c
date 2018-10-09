@@ -87,7 +87,7 @@ void MQTTClientDeInit(MQTTClient *c)
 {
     if(!c)
         return;
-#ifdef __MQTT_LITE_OS__
+#if defined (__MQTT_LITE_OS__)
     if(c->mutex)
     {
         atiny_mutex_lock(c->mutex);
@@ -498,18 +498,18 @@ int MQTTYield(MQTTClient *c, int timeout_ms)
 
     do
     {
-#ifdef __MQTT_LITE_OS__
+#if defined (__MQTT_LITE_OS__)
         if(c->mutex) atiny_mutex_lock(c->mutex);
 #endif
         if ( (rc = cycle(c, &timer) ) < 0)
         {
             rc = FAILURE;
-#ifdef __MQTT_LITE_OS__
+#if defined (__MQTT_LITE_OS__)
             if(c->mutex) atiny_mutex_unlock(c->mutex);
 #endif
             break;
         }
-#ifdef __MQTT_LITE_OS__
+#if defined (__MQTT_LITE_OS__)
         if(c->mutex) atiny_mutex_unlock(c->mutex);
 #endif
     }

@@ -152,14 +152,14 @@ int atiny_param_dup(atiny_param_t *dest, atiny_param_t *src)
         dest->u.ca.ca_crt = atiny_strdup((const char *)(src->u.ca.ca_crt));
         if(NULL == dest->u.ca.ca_crt)
             goto atiny_param_dup_failed;
-		#if 0
+        #if 0
         dest->u.ca.server_crt = atiny_strdup((const char *)(src->u.ca.server_crt));
         if(NULL == dest->u.ca.server_crt)
             goto atiny_param_dup_failed;
         dest->u.ca.server_key = atiny_strdup((const char *)(src->u.ca.server_key));
         if(NULL == dest->u.ca.server_key)
             goto atiny_param_dup_failed;
-		#endif
+        #endif
         break;
     default:
         break;
@@ -717,8 +717,8 @@ int atiny_bind(atiny_device_info_t *device_info, void *phandle)
         n.psk.psk_len = atiny_params->u.psk.psk_len;
         break;
     case CLOUD_SECURITY_TYPE_CA:
-		n.proto = MQTT_PROTO_TLS_CA;
-		n.ca.ca_crt = atiny_params->u.ca.ca_crt;
+        n.proto = MQTT_PROTO_TLS_CA;
+        n.ca.ca_crt = atiny_params->u.ca.ca_crt;
         ATINY_LOG(LOG_INFO, "CLOUD_SECURITY_TYPE_CA support one way now" );
         break;
     default:
