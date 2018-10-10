@@ -122,7 +122,8 @@ C_DEFS =  \
         -D ATINY_DEBUG \
         -D USE_MBED_TLS \
         -D WITH_DTLS  \
-        -D WITH_CA \
+        -D WITH_CA_BI \
+        -D MBEDTLS_DEBUG_C \
         -D MBEDTLS_CONFIG_FILE=\"los_mbedtls_config_x509.h\" \
         -D LWIP_TIMEVAL_PRIVATE=0
 
