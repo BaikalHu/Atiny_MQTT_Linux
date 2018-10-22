@@ -32,6 +32,7 @@ int MQTTSerialize_unsubscribeLength(int count, MQTTString topicFilters[])
 
     for (i = 0; i < count; ++i)
         len += 2 + MQTTstrlen(topicFilters[i]); /* length + topic*/
+
     return len;
 }
 
@@ -54,7 +55,6 @@ int MQTTSerialize_unsubscribe(unsigned char *buf, int buflen, unsigned char dup,
     int rem_len = 0;
     int rc = -1;
     int i = 0;
-
     FUNC_ENTRY;
     if (MQTTPacket_len(rem_len = MQTTSerialize_unsubscribeLength(count, topicFilters)) > buflen)
     {

@@ -52,13 +52,6 @@ void device_info_member_free(atiny_device_info_t *info);
 unsigned char mqtt_sendbuf[MQTT_SENDBUF_SIZE];
 unsigned char mqtt_readbuf[MQTT_READBUF_SIZE];
 
-typedef struct
-{
-    atiny_device_info_t device_info;
-    MQTTClient client;
-    atiny_param_t atiny_params;
-    char atiny_quit;
-} handle_data_t;
 
 static handle_data_t g_atiny_handle;
 
@@ -269,7 +262,7 @@ int mqtt_add_interest_topic(char *topic, cloud_qos_level_e qos, atiny_rsp_cb cb,
     return rc;
 }
 
-int mqtt_is_topic_subscribed(const char *topic)
+int mqtt_is_topic_subscribed(const char *topic, int topic_len)
 {
     int i, rc = MQTT_TOPIC_SUBSCRIBED_FALSE;
     atiny_interest_uri_t *interest_uris = g_atiny_handle.device_info.interest_uris;
@@ -282,7 +275,7 @@ int mqtt_is_topic_subscribed(const char *topic)
 
     for(i = 0; i < ATINY_INTEREST_URI_MAX_NUM; i++)
     {
-        if(NULL != interest_uris[i].uri && 0 == strcmp(interest_uris[i].uri, topic))
+        if(NULL != interest_uris[i].uri && 0 == strncmp(interest_uris[i].uri, topic, topic_len))
         {
             rc = MQTT_TOPIC_SUBSCRIBED_TRUE;
             break;
@@ -376,9 +369,10 @@ int mqtt_topic_subscribe(MQTTClient *client, char *topic, cloud_qos_level_e qos,
     return rc;
 }
 
-int mqtt_topic_unsubscribe(MQTTClient *client, const char *topic)
+int mqtt_topic_unsubscribe(MQTTClient *client, const char *topic, int topic_len)
 {
     int rc = -1;
+    char *real_topic = NULL;
 
     if(!client || !topic)
     {
@@ -386,23 +380,31 @@ int mqtt_topic_unsubscribe(MQTTClient *client, const char *topic)
         return -1;
     }
 
-    if(client->mutex) atiny_mutex_lock(client->mutex);
-    rc = mqtt_is_topic_subscribed(topic);
-    if(client->mutex) atiny_mutex_unlock(client->mutex);
+    real_topic = (char *)atiny_malloc(topic_len);
+    if(!real_topic)
+    {
+        ATINY_LOG(LOG_FATAL, "malloc error");
+        return -1;
+    }
+    memcpy(real_topic, topic, topic_len);
 
+    if(client->mutex) atiny_mutex_lock(client->mutex);
+    rc = mqtt_is_topic_subscribed(topic, topic_len);
+    if(client->mutex) atiny_mutex_unlock(client->mutex);
     if(MQTT_TOPIC_SUBSCRIBED_TRUE == rc)
     {
-        rc = MQTTUnsubscribe(client, topic);
+        rc = MQTTUnsubscribe(client, real_topic);
         if(0 != rc)
             ATINY_LOG(LOG_ERR, "MQTTUnsubscribe %s[%d]", topic, rc);
         else
         {
             if(client->mutex) atiny_mutex_lock(client->mutex);
-            (void)mqtt_del_interest_topic(topic);
+            (void)mqtt_del_interest_topic(real_topic);
             if(client->mutex) atiny_mutex_unlock(client->mutex);
         }
     }
 
+    atiny_free(real_topic);
     return rc;
 }
 
@@ -426,6 +428,45 @@ int mqtt_message_publish(MQTTClient *client, cloud_msg_t *send_data)
         ATINY_LOG(LOG_ERR, "Return code from MQTT publish is %d", rc);
 
     return rc;
+}
+
+int mqtt_dev_publish(MQTTClient *client, atiny_dev_uri_t dev_uris[ATINY_DEV_URI_MAX_NUM])
+{
+    int i, rc = ATINY_ARG_INVALID;
+    MQTTMessage message;
+
+    if(NULL == client || NULL == dev_uris)
+    {
+        ATINY_LOG(LOG_FATAL, "Parameter null");
+        return rc;
+    }
+
+    for(i = 0; i < ATINY_DEV_URI_MAX_NUM; i++)
+    {
+        memset(&message, 0x0, sizeof(message));
+        if(client->mutex) atiny_mutex_lock(client->mutex);
+        if(NULL == dev_uris[i].uri || '\0' == dev_uris[i].uri[0] ||
+                 !(dev_uris[i].qos >= CLOUD_QOS_MOST_ONCE && dev_uris[i].qos < CLOUD_QOS_LEVEL_MAX))
+        {
+            if(client->mutex) atiny_mutex_unlock(client->mutex);
+            continue;
+        }
+        message.qos = dev_uris[i].qos;
+        message.retained = 0;
+        message.payload = dev_uris[i].payload;
+        message.payloadlen = dev_uris[i].payload_len;
+        if(client->mutex) atiny_mutex_unlock(client->mutex);
+        rc = MQTTPublish(client, dev_uris[i].uri, &message);
+        ATINY_LOG(LOG_DEBUG, "MQTTPublish %s[%d]", dev_uris[i].uri, rc);
+        if(rc != 0)
+        {
+            rc = ATINY_SOCKET_ERROR;
+            break;
+        }
+    }
+
+    return rc;
+
 }
 
 void mqtt_message_arrived(MessageData *md)
@@ -581,6 +622,17 @@ void device_info_member_free(atiny_device_info_t *info)
         }
     }
 
+    for(i = 0; i < ATINY_DEV_URI_MAX_NUM; i++)
+    {
+        if(NULL != info->dev_uris[i].uri)
+        {
+            atiny_free(info->dev_uris[i].uri);
+            info->interest_uris[i].uri = NULL;
+			atiny_free(info->dev_uris[i].payload);
+			info->dev_uris[i].payload = NULL;
+        }
+    }
+
     return;
 }
 
@@ -642,6 +694,19 @@ int device_info_dup(atiny_device_info_t *dest, atiny_device_info_t *src)
             goto device_info_dup_failed;
         dest->interest_uris[i].qos = src->interest_uris[i].qos;
         dest->interest_uris[i].cb = src->interest_uris[i].cb;
+    }
+
+    for(i = 0; i < ATINY_DEV_URI_MAX_NUM; i++)
+    {
+        if(NULL == src->dev_uris[i].uri || '\0' == src->dev_uris[i].uri[0]
+                || !(src->dev_uris[i].qos >= CLOUD_QOS_MOST_ONCE && src->dev_uris[i].qos < CLOUD_QOS_LEVEL_MAX))
+            continue;
+        dest->dev_uris[i].uri = atiny_strdup(src->dev_uris[i].uri);
+        if(NULL == dest->dev_uris[i].uri)
+            goto device_info_dup_failed;
+        dest->dev_uris[i].qos = src->dev_uris[i].qos;
+		dest->dev_uris[i].payload_len = src->dev_uris[i].payload_len;
+		dest->dev_uris[i].payload = atiny_strdup((const char *)(src->dev_uris[i].payload));
     }
 
     return 0;
@@ -783,6 +848,14 @@ int atiny_bind(atiny_device_info_t *device_info, void *phandle)
             goto connect_again;
         }
 
+		if(ATINY_SOCKET_ERROR == mqtt_dev_publish(client, device_info_t->dev_uris))
+        {
+            ATINY_LOG(LOG_ERR, "mqtt_dev_publish failed");
+            if(conn_failed_cnt < MQTT_CONN_FAILED_MAX_TIMES)
+                conn_failed_cnt++;
+            goto connect_again;
+        }
+
         if(ATINY_SOCKET_ERROR == mqtt_subscribe_interest_topics(client, device_info_t->interest_uris))
         {
             ATINY_LOG(LOG_ERR, "mqtt_subscribe_interest_topics failed");
@@ -867,7 +940,7 @@ int atiny_data_send(void *phandle, cloud_msg_t *send_data, atiny_rsp_cb cb)
         rc = mqtt_message_publish(client, send_data);
         break;
     case CLOUD_METHOD_DEL:
-        rc = mqtt_topic_unsubscribe(client, send_data->uri);
+        rc = mqtt_topic_unsubscribe(client, send_data->uri, send_data->uri_len);
         break;
     default:
         ATINY_LOG(LOG_WARNING, "unsupported method : %d", send_data->method);

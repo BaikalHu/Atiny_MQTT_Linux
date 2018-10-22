@@ -756,7 +756,6 @@ int MQTTUnsubscribe(MQTTClient *c, const char *topicFilter)
 
     TimerInit(&timer);
     TimerCountdownMS(&timer, c->command_timeout_ms);
-
     if ((len = MQTTSerialize_unsubscribe(c->buf, c->buf_size, 0, getNextPacketId(c), 1, &topic)) <= 0)
         goto exit;
     if ((rc = sendPacket(c, len, &timer)) != MQTT_SUCCESS) // send the subscribe packet

@@ -18,7 +18,7 @@
 #include "MQTTLinux.h"
 #include "atiny_log.h"
 
-#ifdef WITH_DTLS
+#if 1//def WITH_DTLS
 #include "mbedtls/net_sockets.h"
 #include "mbedtls/ssl.h"
 #include "mbedtls/entropy.h"
@@ -945,9 +945,11 @@ int NetworkConnect(Network *n, char *addr, int port)
     case MQTT_PROTO_TLS_PSK:
         //ret = los_mqtt_tls_connect(n, addr, port);
         break;
+#ifdef WITH_CA_UNI
     case MQTT_PROTO_TLS_CA_UNI:
         ret = los_mqtt_tls_ca_uni_connect(n, addr, port);
         break;
+#endif
 #ifdef WITH_CA_BI
     case MQTT_PROTO_TLS_CA_BI:
         ret = los_mqtt_tls_ca_bi_connect(n, addr, port);

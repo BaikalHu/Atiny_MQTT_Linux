@@ -743,7 +743,7 @@ static int los_mqtt_tls_ca_connect(Network *n, char *addr, int port)
         goto exit;
     }
 
-    if( ( ret = mbedtls_ssl_set_hostname( ssl, "ubuntu" ) ) != 0 )
+    if( ( ret = mbedtls_ssl_set_hostname( ssl, "MacBook-Air.local" ) ) != 0 )
     {
         ATINY_LOG(LOG_ERR, 
                         " failed\n  ! mbedtls_ssl_set_hostname returned %d\n\n",
