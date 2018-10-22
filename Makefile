@@ -87,6 +87,10 @@ AGENT_DEMO_SRC = \
         ${wildcard $(TOP_DIR)/agent_tiny/examples/mqtt_demo/*.c}
         C_SOURCES += $(AGENT_DEMO_SRC)
 
+CJSON_SRC = \
+        ${wildcard $(TOP_DIR)/cJSON/cJSON*.c}
+        C_SOURCES += $(CJSON_SRC)
+
 USER_SRC =  \
         $(TOP_DIR)/main.c
         C_SOURCES += $(USER_SRC)
@@ -121,12 +125,12 @@ C_DEFS =  \
         -D LWM2M_CLIENT_MODE \
         -D ATINY_DEBUG \
         -D USE_MBED_TLS \
-        -D WITH_DTLS  \
-        -D WITH_CA_BI \
         -D MBEDTLS_DEBUG_C \
         -D MBEDTLS_CONFIG_FILE=\"los_mbedtls_config_x509.h\" \
         -D LWIP_TIMEVAL_PRIVATE=0
 
+     #   -D WITH_DTLS  \
+        -D WITH_CA_UNI \
 
 # AS includes
 AS_INCLUDES =
@@ -164,6 +168,9 @@ AGENT_DEMO_INC = \
         -I $(TOP_DIR)/agent_tiny/examples/mqtt_demo
         C_INCLUDES += $(AGENT_DEMO_INC)
 
+CJSON_INC = \
+        -I $(TOP_DIR)/cJSON
+        C_INCLUDES += $(CJSON_INC)
 
 
 # compile gcc flags

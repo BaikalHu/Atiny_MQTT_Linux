@@ -34,10 +34,16 @@
 
 #include "agent_tiny_demo.h"
 #include "atiny_log.h"
+#include "cJSON.h"
 #include <pthread.h>
 #include <unistd.h>
 
-void message_cb(cloud_msg_t *msg);
+void dev_message_cb(cloud_msg_t *msg);
+void twins_message_cb(cloud_msg_t *msg);
+void dev_message_update_cb(cloud_msg_t *msg);
+void twins_message_update_cb(cloud_msg_t *msg);
+void dev_message_handle_cb(cloud_msg_t *msg);
+
 
 #define DEFAULT_SERVER_IPV4  "127.0.0.1" //"192.168.91.131"   //"192.168.0.100"
 #ifdef WITH_DTLS
@@ -162,6 +168,9 @@ const size_t mqtt_test_cli_key_len = sizeof(mqtt_test_cli_key);
 #define AGENT_TINY_DEMO_PUB_TOPIC "/pub_test"
 #define AGENT_TINY_DEMO_SUB_TOPIC "/helloworld"
 
+#define AGENT_TINY_PROJECT_ID "LietOS"
+#define AGENT_TINY_DEVICE_ID "STM32F429"
+
 static void *g_phandle = NULL;
 static atiny_device_info_t g_device_info;
 static atiny_param_t g_atiny_params;
@@ -169,16 +178,99 @@ static atiny_param_t g_atiny_params;
 atiny_interest_uri_t g_interest_uris[ATINY_INTEREST_URI_MAX_NUM] =
 {
     {
-        .uri = AGENT_TINY_DEMO_SUB_TOPIC,
+        .uri = "/"AGENT_TINY_PROJECT_ID"/device/"AGENT_TINY_DEVICE_ID"/properties/result",
         .qos = CLOUD_QOS_MOST_ONCE,
-        .cb = message_cb
+        .cb = dev_message_cb
+    },
+    {
+        .uri = "/"AGENT_TINY_PROJECT_ID"/device/"AGENT_TINY_DEVICE_ID"/twins/result",
+        .qos = CLOUD_QOS_MOST_ONCE,
+        .cb = twins_message_cb
+    },
+    {
+        .uri = "/"AGENT_TINY_PROJECT_ID"/device/"AGENT_TINY_DEVICE_ID"/properties/todevice",
+        .qos = CLOUD_QOS_MOST_ONCE,
+        .cb = dev_message_update_cb
+    },
+    {
+        .uri = "/"AGENT_TINY_PROJECT_ID"/device/"AGENT_TINY_DEVICE_ID"/twins/expected",
+        .qos = CLOUD_QOS_MOST_ONCE,
+        .cb = twins_message_update_cb
+    },
+    {
+        .uri = "/"AGENT_TINY_PROJECT_ID"/device/"AGENT_TINY_DEVICE_ID"/messages/todevice/#",
+        .qos = CLOUD_QOS_MOST_ONCE,
+        .cb = dev_message_handle_cb
+    },
+
+};
+
+atiny_dev_uri_t g_dev_uris[ATINY_DEV_URI_MAX_NUM] =
+{
+    {
+        .uri = "/"AGENT_TINY_PROJECT_ID"/device/"AGENT_TINY_DEVICE_ID"/properties",
+        .qos = CLOUD_QOS_LEAST_ONCE,
+        .payload_len = 0,
+        .payload = ""
+    },
+    {
+        .uri = "/"AGENT_TINY_PROJECT_ID"/device/"AGENT_TINY_DEVICE_ID"/properties/tocloud",
+        .qos = CLOUD_QOS_LEAST_ONCE,
+        .payload_len = 13,
+        .payload = "dev json data"
+    },
+    {
+        .uri = "/"AGENT_TINY_PROJECT_ID"/device/"AGENT_TINY_DEVICE_ID"/twins",
+        .qos = CLOUD_QOS_MOST_ONCE,
+        .payload_len = 0,
+        .payload = ""
     },
 };
 
-void message_cb(cloud_msg_t *msg)
+void dev_message_cb(cloud_msg_t *msg)
 {
+    handle_data_t *handle;
+    MQTTClient *client;
+
+    handle = (handle_data_t *)g_phandle;
+    client = &(handle->client);
     ATINY_LOG(LOG_DEBUG, "%.*s : %.*s", msg->uri_len, msg->uri, msg->payload_len,  (char *)msg->payload);
+    mqtt_topic_unsubscribe(client, msg->uri, msg->uri_len);
 }
+
+void twins_message_cb(cloud_msg_t *msg)
+{
+    handle_data_t *handle;
+    MQTTClient *client;
+
+    handle = (handle_data_t *)g_phandle;
+    client = &(handle->client);
+
+    ATINY_LOG(LOG_DEBUG, "%.*s : %.*s", msg->uri_len, msg->uri, msg->payload_len,  (char *)msg->payload);
+    mqtt_topic_unsubscribe(client, msg->uri, msg->uri_len);
+}
+
+void dev_message_update_cb(cloud_msg_t *msg)
+{
+    cJSON *root = NULL;
+
+    ATINY_LOG(LOG_DEBUG, "%.*s : %.*s", msg->uri_len, msg->uri, msg->payload_len,  (char *)msg->payload);
+
+    root = cJSON_Parse(msg->payload);
+    printf("%s\n\n", cJSON_Print(root));
+}
+
+void twins_message_update_cb(cloud_msg_t *msg)
+{
+
+}
+
+void dev_message_handle_cb(cloud_msg_t *msg)
+{
+
+}
+
+
 /*lint -e550*/
 void* app_data_report(void *param)
 {
@@ -230,6 +322,7 @@ void* agent_tiny_entry(void *param)
     device_info->will_flag = MQTT_WILL_FLAG_FALSE;
     device_info->will_options = NULL;
     memcpy(device_info->interest_uris, g_interest_uris, sizeof(g_interest_uris));
+	memcpy(device_info->dev_uris, g_dev_uris, sizeof(g_dev_uris));
 
     atiny_params = &g_atiny_params;
     atiny_params->server_ip = DEFAULT_SERVER_IPV4;
@@ -260,7 +353,7 @@ void* agent_tiny_entry(void *param)
         return NULL;
     }
 
-    uwRet = creat_report_task();
+    //uwRet = creat_report_task();
     if(0 != uwRet)
     {
         return NULL;

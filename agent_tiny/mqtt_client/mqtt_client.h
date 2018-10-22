@@ -36,6 +36,7 @@
 #define __MQTT_CLIENT_H__
 
 #include "mqtt_config.h"
+#include "MQTTClient.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -113,6 +114,14 @@ typedef struct atiny_interest_uri
     atiny_rsp_cb cb;
 }atiny_interest_uri_t;
 
+typedef struct atiny_dev_uri
+{
+    char *uri;
+    cloud_qos_level_e qos;
+    unsigned int payload_len;
+    void *payload;
+}atiny_dev_uri_t;
+
 typedef struct atiny_device_info
 {
     char *client_id;
@@ -121,6 +130,7 @@ typedef struct atiny_device_info
     char will_flag;
     cloud_will_options_t *will_options;
     atiny_interest_uri_t interest_uris[ATINY_INTEREST_URI_MAX_NUM];
+    atiny_dev_uri_t dev_uris[ATINY_DEV_URI_MAX_NUM];
 }atiny_device_info_t;
 
 typedef struct cloud_security_psk
@@ -149,6 +159,14 @@ typedef struct atiny_param
         cloud_security_ca_t ca;
     }u;
 }atiny_param_t;
+
+typedef struct
+{
+    atiny_device_info_t device_info;
+    MQTTClient client;
+    atiny_param_t atiny_params;
+    char atiny_quit;
+} handle_data_t;
 
 int  atiny_init(atiny_param_t* atiny_params, void** phandle);
 void atiny_deinit(void* phandle);
