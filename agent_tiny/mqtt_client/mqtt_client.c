@@ -848,17 +848,17 @@ int atiny_bind(atiny_device_info_t *device_info, void *phandle)
             goto connect_again;
         }
 
-		if(ATINY_SOCKET_ERROR == mqtt_dev_publish(client, device_info_t->dev_uris))
+        if(ATINY_SOCKET_ERROR == mqtt_subscribe_interest_topics(client, device_info_t->interest_uris))
         {
-            ATINY_LOG(LOG_ERR, "mqtt_dev_publish failed");
+            ATINY_LOG(LOG_ERR, "mqtt_subscribe_interest_topics failed");
             if(conn_failed_cnt < MQTT_CONN_FAILED_MAX_TIMES)
                 conn_failed_cnt++;
             goto connect_again;
         }
 
-        if(ATINY_SOCKET_ERROR == mqtt_subscribe_interest_topics(client, device_info_t->interest_uris))
+	if(ATINY_SOCKET_ERROR == mqtt_dev_publish(client, device_info_t->dev_uris))
         {
-            ATINY_LOG(LOG_ERR, "mqtt_subscribe_interest_topics failed");
+            ATINY_LOG(LOG_ERR, "mqtt_dev_publish failed");
             if(conn_failed_cnt < MQTT_CONN_FAILED_MAX_TIMES)
                 conn_failed_cnt++;
             goto connect_again;

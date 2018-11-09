@@ -125,12 +125,12 @@ C_DEFS =  \
         -D LWM2M_CLIENT_MODE \
         -D ATINY_DEBUG \
         -D USE_MBED_TLS \
-        -D MBEDTLS_DEBUG_C \
+        -D WITH_DTLS  \
+        -D WITH_CA_BI \
         -D MBEDTLS_CONFIG_FILE=\"los_mbedtls_config_x509.h\" \
         -D LWIP_TIMEVAL_PRIVATE=0
 
-     #   -D WITH_DTLS  \
-        -D WITH_CA_UNI \
+        #-D MBEDTLS_DEBUG_C \
 
 # AS includes
 AS_INCLUDES =

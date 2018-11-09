@@ -794,7 +794,7 @@ static int los_mqtt_tls_ca_bi_connect(Network *n, char *addr, int port)
     mbedtls_ssl_conf_rng( conf, mbedtls_ctr_drbg_random, ctr_drbg );
     mbedtls_ssl_conf_dbg( conf, my_debug, stdout );
 
-    mbedtls_ssl_conf_read_timeout( conf, 100 );
+    mbedtls_ssl_conf_read_timeout( conf, 1000 );
 
 	if( ( ret = mbedtls_ssl_conf_own_cert( conf, clicert, pkey ) ) != 0 )
 	{
