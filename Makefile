@@ -56,13 +56,13 @@ BUILD_DIR = build
 
 
 
-#MBEDTLS_SRC = \
-        ${wildcard $(TOP_DIR)/components/security/mbedtls/mbedtls-2.6.0/library/*.c}
-#        C_SOURCES += $(MBEDTLS_SRC)
+MBEDTLS_SRC = \
+        ${wildcard $(TOP_DIR)/mbedtls/mbedtls-2.6.0/library/*.c}
+        C_SOURCES += $(MBEDTLS_SRC)
 
-#MBEDTLS_PORT_SRC = \
-        ${wildcard $(TOP_DIR)/components/security/mbedtls/mbedtls_port/*.c}
-#        C_SOURCES += $(MBEDTLS_PORT_SRC)
+MBEDTLS_PORT_SRC = \
+        ${wildcard $(TOP_DIR)/mbedtls/mbedtls_port/*.c}
+        C_SOURCES += $(MBEDTLS_PORT_SRC)
 
 
 ATINY_LOG_SRC = \
@@ -86,6 +86,10 @@ ATINY_TINY_SRC = \
 AGENT_DEMO_SRC = \
         ${wildcard $(TOP_DIR)/agent_tiny/examples/mqtt_demo/*.c}
         C_SOURCES += $(AGENT_DEMO_SRC)
+
+CJSON_SRC = \
+        ${wildcard $(TOP_DIR)/cJSON/cJSON*.c}
+        C_SOURCES += $(CJSON_SRC)
 
 USER_SRC =  \
         $(TOP_DIR)/main.c
@@ -119,36 +123,28 @@ C_DEFS =  \
         -D WITH_LINUX \
         -D LWM2M_LITTLE_ENDIAN \
         -D LWM2M_CLIENT_MODE \
-   	-D ATINY_DEBUG 
-
-#	-D MBEDTLS_DEBUG_C \
+        -D ATINY_DEBUG \
         -D USE_MBED_TLS \
-#-D WITH_DTLS  \
-        -D WITH_CA
+        -D WITH_DTLS  \
+        -D WITH_CA_BI \
+        -D MBEDTLS_CONFIG_FILE=\"los_mbedtls_config_x509.h\" \
+        -D LWIP_TIMEVAL_PRIVATE=0
 
-	#-D MBEDTLS_X509_CRT_PARSE_C \
-	-D MBEDTLS_X509_USE_C \
-        #-D NDEBUG \
-       # -D WITH_DTLS \
-	-D WITH_CA \
-	-D MBEDTLS_X509_CRT_PARSE_C \
-	-D MBEDTLS_X509_USE_C \
-       # -D WITH_DTLS 
+        #-D MBEDTLS_DEBUG_C \
 
 # AS includes
 AS_INCLUDES =
 
 # C includes
 
+MBEDTLS_INC = \
+        -I $(TOP_DIR)/mbedtls/mbedtls-2.6.0/include \
+        -I $(TOP_DIR)/mbedtls/mbedtls-2.6.0/include/mbedtls
+        C_INCLUDES += $(MBEDTLS_INC)
 
-#MBEDTLS_INC = \
-        -I $(TOP_DIR)/components/security/mbedtls/mbedtls-2.6.0/include \
-        -I $(TOP_DIR)/components/security/mbedtls/mbedtls-2.6.0/include/mbedtls
-#        C_INCLUDES += $(MBEDTLS_INC)
-
-#MBEDTLS_PORT_INC = \
-        -I $(TOP_DIR)/components/security/mbedtls/mbedtls_port
-#        C_INCLUDES += $(MBEDTLS_PORT_INC)
+MBEDTLS_PORT_INC = \
+        -I $(TOP_DIR)/mbedtls/mbedtls_port
+        C_INCLUDES += $(MBEDTLS_PORT_INC)
 
 
 
@@ -162,7 +158,6 @@ OS_ADAPTER_INC = \
         -I $(TOP_DIR)/agent_tiny/osadapter
         C_INCLUDES += $(OS_ADAPTER_INC)
 
-	#-I $(TOP_DIR)/agent_tiny/lwm2m_client \
 
 ATINY_TINY_INC = \
 	-I $(TOP_DIR)/agent_tiny/mqtt_client \
@@ -173,6 +168,9 @@ AGENT_DEMO_INC = \
         -I $(TOP_DIR)/agent_tiny/examples/mqtt_demo
         C_INCLUDES += $(AGENT_DEMO_INC)
 
+CJSON_INC = \
+        -I $(TOP_DIR)/cJSON
+        C_INCLUDES += $(CJSON_INC)
 
 
 # compile gcc flags

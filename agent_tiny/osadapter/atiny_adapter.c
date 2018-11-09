@@ -121,6 +121,12 @@ char *atiny_strdup(const char *ch)
     return strdup(ch);
 }
 
+char *atiny_strndup(const char *ch, size_t n)
+{
+    return strndup(ch,n);
+}
+
+
 #ifdef WITH_LINUX
 
 void *atiny_mutex_create(void)

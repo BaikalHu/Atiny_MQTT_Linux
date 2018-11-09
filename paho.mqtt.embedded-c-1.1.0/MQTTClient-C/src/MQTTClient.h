@@ -36,8 +36,11 @@
 
 #include "MQTTPacket.h"
 #include "stdio.h"
+#ifdef WITH_LINUX
 #include "MQTTLinux.h"
-//#include "MQTTliteos.h"
+#else
+#include "MQTTliteos.h"
+#endif
 	
 #if defined(MQTTCLIENT_PLATFORM_HEADER)
 /* The following sequence of macros converts the MQTTCLIENT_PLATFORM_HEADER value
@@ -133,7 +136,7 @@ typedef struct MQTTClient
     Mutex mutex;
     Thread thread;
 #endif
-#if 1//def __MQTT_LITE_OS__
+#if defined (__MQTT_LITE_OS__)  || defined(WITH_LINUX)
     void *mutex;
 #endif
 } MQTTClient;

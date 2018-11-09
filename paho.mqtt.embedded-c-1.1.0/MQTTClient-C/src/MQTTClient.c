@@ -87,7 +87,7 @@ void MQTTClientDeInit(MQTTClient *c)
 {
     if(!c)
         return;
-#ifdef __MQTT_LITE_OS__
+#if defined (__MQTT_LITE_OS__)
     if(c->mutex)
     {
         atiny_mutex_lock(c->mutex);
@@ -498,18 +498,18 @@ int MQTTYield(MQTTClient *c, int timeout_ms)
 
     do
     {
-#ifdef __MQTT_LITE_OS__
+#if defined (__MQTT_LITE_OS__)
         if(c->mutex) atiny_mutex_lock(c->mutex);
 #endif
         if ( (rc = cycle(c, &timer) ) < 0)
         {
             rc = FAILURE;
-#ifdef __MQTT_LITE_OS__
+#if defined (__MQTT_LITE_OS__)
             if(c->mutex) atiny_mutex_unlock(c->mutex);
 #endif
             break;
         }
-#ifdef __MQTT_LITE_OS__
+#if defined (__MQTT_LITE_OS__)
         if(c->mutex) atiny_mutex_unlock(c->mutex);
 #endif
     }
@@ -756,7 +756,6 @@ int MQTTUnsubscribe(MQTTClient *c, const char *topicFilter)
 
     TimerInit(&timer);
     TimerCountdownMS(&timer, c->command_timeout_ms);
-
     if ((len = MQTTSerialize_unsubscribe(c->buf, c->buf_size, 0, getNextPacketId(c), 1, &topic)) <= 0)
         goto exit;
     if ((rc = sendPacket(c, len, &timer)) != MQTT_SUCCESS) // send the subscribe packet
