@@ -71,8 +71,7 @@ typedef enum mqtt_proto
 {
     MQTT_PROTO_NONE = 0,
     MQTT_PROTO_TLS_PSK,
-    MQTT_PROTO_TLS_CA_UNI,
-    MQTT_PROTO_TLS_CA_BI,
+    MQTT_PROTO_TLS_CA,
     MQTT_PROTO_MAX
 }mqtt_proto_e;
 

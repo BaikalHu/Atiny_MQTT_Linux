@@ -57,28 +57,6 @@ const char server_name[] = SERVER_NAME;
 #define DEFAULT_SERVER_PORT "1883"
 #endif /* WITH_DTLS */
 
-#ifdef WITH_CA_UNI
-#define MQTT_TEST_CA_CRT    \
-"-----BEGIN CERTIFICATE-----\r\n"    \
-"MIICxjCCAa6gAwIBAgIJAJk1DbZBu8FDMA0GCSqGSIb3DQEBCwUAMBMxETAPBgNV\r\n"    \
-"BAMMCE15VGVzdENBMB4XDTE3MTEwMjEzNDI0N1oXDTE5MTEwMjEzNDI0N1owEzER\r\n"    \
-"MA8GA1UEAwwITXlUZXN0Q0EwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIB\r\n"    \
-"AQDshDho6ef1JClDJ24peSsXdFnFO3xIB7+BSp1YPcOvmRECKUG0mLORw3hNm15m\r\n"    \
-"8eGOn1iLGE/xKlaZ74/xjyq8f7qIGZCmvZj59m+eiJCAmy8SiUJZtSVoOlOzepJd\r\n"    \
-"PoDgcBvDKA4ogZ3iJHMUNI3EdlD6nrKEJF2qe2JUrL0gv65uo2/N7XVNvE87Dk3J\r\n"    \
-"83KyCAmeu+x+moS1ILnjs2DuPEGSxZqzf7IQMbXuNWJYAOZg9t4Fg0YjTiAaWw3G\r\n"    \
-"JKAoMY4tI3JCqlvwGR4lH7kfk3WsD4ofGlFhxU4nEG0xgnJl8BcoJWD1A2RjGe1f\r\n"    \
-"qCijqPSe93l2wt8OpbyHzwc7AgMBAAGjHTAbMAwGA1UdEwQFMAMBAf8wCwYDVR0P\r\n"    \
-"BAQDAgEGMA0GCSqGSIb3DQEBCwUAA4IBAQAi+t5jBrMxFzoF76kyRd3riNDlWp0w\r\n"    \
-"NCewkohBkwBHsQfHzSnc6c504jdyzkEiD42UcI8asPsJcsYrQ+Uo6OBn049u49Wn\r\n"    \
-"zcSERVSVec1/TAPS/egFTU9QMWtPSAm8AEaQ6YYAuiwOLCcC+Cm/a3e3dWSRWt8o\r\n"    \
-"LqKX6CWTlmKWe182MhFPpZYxZQLGapti4R4mb5QusUbc6tXbkcX82GjDPTOuAw7b\r\n"    \
-"mWpzVd5xnlp7Vz+50u+YaAYUmCobg0hR/AuTrA4GDMlgzTnuZQhF6o8iVkypXOtS\r\n"    \
-"Ufz6X3tVVErVVc7UUfzSnupHj1M2h4rzlQ3oqHoAEnXcJmV4f/Pf/6FW\r\n"    \
-"-----END CERTIFICATE-----\r\n"
-const char mqtt_test_cas_pem[] = MQTT_TEST_CA_CRT;
-const size_t mqtt_test_cas_pem_len = sizeof(mqtt_test_cas_pem);
-#endif
 
 #if 0
 #ifdef WITH_CA_BI
@@ -161,7 +139,7 @@ const size_t mqtt_test_cli_key_len = sizeof(mqtt_test_cli_key);
 #endif
 #endif
 
-#ifdef WITH_CA_BI
+#ifdef WITH_CA
 #define MQTT_TEST_CA_CRT    \
 "-----BEGIN CERTIFICATE-----\r\n"    \
 "MIIG4jCCBMqgAwIBAgIQYhDv/cGS6DgAAAAAAAAAADANBgkqhkiG9w0BAQsFADCB\r\n"    \
@@ -290,11 +268,13 @@ const size_t mqtt_test_cli_key_len = sizeof(mqtt_test_cli_key);
 #define AGENT_TINY_DEMO_USERNAME NULL
 #define AGENT_TINY_DEMO_PASSWORD NULL
 
-#define AGENT_TINY_DEMO_PUB_TOPIC "/pub_test"
-#define AGENT_TINY_DEMO_SUB_TOPIC "/helloworld"
 
 #define AGENT_TINY_PROJECT_ID "cb1d33433e2648b0a0f40ad1a0c5ffbb"
 #define AGENT_TINY_DEVICE_ID "894d48f8-45c0-4ac4-8d18-f5b983ef9159"
+
+#define AGENT_TINY_DEMO_PUB_TOPIC AGENT_TINY_PROJECT_ID"/device/"AGENT_TINY_DEVICE_ID"/twins/actual"
+#define AGENT_TINY_DEMO_SUB_TOPIC "/helloworld"
+
 
 static void *g_phandle = NULL;
 static atiny_device_info_t g_device_info;
@@ -330,6 +310,11 @@ atiny_interest_uri_t g_interest_uris[ATINY_INTEREST_URI_MAX_NUM] =
 
 };
 
+#define tpayload "{\"attributes\": {\"username\": {\"optional\": true, \"value\": \"894d48f8-45c0-4ac4-8d18-f5b983ef9159\", \"metadata\": {\"type\": \"string\"}}, \"ipaddress\": {\"optional\": true, \"value\": \"172.16.1.17\", \"metadata\": {\"type\": \"string\"}}, \"temp\": {\"optional\": true, \"value\": \"6\", \"metadata\": {\"type\": \"int\"}}}}"
+const char ppload[] = tpayload;
+
+size_t  tpayload_len = sizeof(ppload);
+
 atiny_dev_uri_t g_dev_uris[ATINY_DEV_URI_MAX_NUM] =
 {
     {
@@ -341,8 +326,8 @@ atiny_dev_uri_t g_dev_uris[ATINY_DEV_URI_MAX_NUM] =
     {
         .uri = AGENT_TINY_PROJECT_ID"/device/"AGENT_TINY_DEVICE_ID"/properties/tocloud",
         .qos = CLOUD_QOS_LEAST_ONCE,
-        .payload_len = 13,
-        .payload = "dev json data"
+        .payload_len = 0,
+        .payload = ""
     },
     {
         .uri = AGENT_TINY_PROJECT_ID"/device/"AGENT_TINY_DEVICE_ID"/twins",
@@ -360,7 +345,6 @@ void dev_message_cb(cloud_msg_t *msg)
     handle = (handle_data_t *)g_phandle;
     client = &(handle->client);
     ATINY_LOG(LOG_DEBUG, "%.*s : %.*s", msg->uri_len, msg->uri, msg->payload_len,  (char *)msg->payload);
-    //mqtt_topic_unsubscribe(client, msg->uri, msg->uri_len);
 }
 
 void twins_message_cb(cloud_msg_t *msg)
@@ -372,7 +356,6 @@ void twins_message_cb(cloud_msg_t *msg)
     client = &(handle->client);
 
     ATINY_LOG(LOG_DEBUG, "%.*s : %.*s", msg->uri_len, msg->uri, msg->payload_len,  (char *)msg->payload);
-    //mqtt_topic_unsubscribe(client, msg->uri, msg->uri_len);
 }
 
 void dev_message_update_cb(cloud_msg_t *msg)
@@ -402,7 +385,7 @@ void* app_data_report(void *param)
     cloud_msg_t report_data;
     int ret;
     int cnt = 0;
-    char payload[30] = {0};
+    char payload[500] = "{\"twin\": {\"shidu\": {\"actual\": {\"value\": \"188\"}, \"optional\": true, \"metadata\": {\"type\": \"int\"}}}}";
 
     report_data.uri = AGENT_TINY_DEMO_PUB_TOPIC;
     report_data.qos = CLOUD_QOS_MOST_ONCE;
@@ -410,7 +393,7 @@ void* app_data_report(void *param)
     report_data.payload = payload;
     while(1)
     {
-        sprintf(payload, "publish message number %d", cnt);
+        //sprintf(payload, "%s", "{\"attributes\": {\"username\": {\"optional\": true, \"value\": \"894d48f8-45c0-4ac4-8d18-f5b983ef9159\", \"metadata\": {\"type\": \"string\"}}, \"ipaddress\": {\"optional\": true, \"value\": \"172.16.1.17\", \"metadata\": {\"type\": \"string\"}}, \"temp\": {\"optional\": true, \"value\": \"6\", \"metadata\": {\"type\": \"int\"}}}}");
         report_data.payload_len = strlen(payload);
         payload[report_data.payload_len] = '\0';
         cnt++;
@@ -458,13 +441,8 @@ void* agent_tiny_entry(void *param)
     atiny_params->u.psk.psk_id_len = strlen(AGENT_TINY_DEMO_PSK_ID);
     atiny_params->u.psk.psk = g_demo_psk;
     atiny_params->u.psk.psk_len = AGENT_TINY_DEMO_PSK_LEN;
-#if defined WITH_CA_UNI
-    atiny_params->security_type = CLOUD_SECURITY_TYPE_CA_UNI;
-    atiny_params->u.ca.ca_crt = MQTT_TEST_CA_CRT;
-    atiny_params->u.ca.client_crt = NULL;
-    atiny_params->u.ca.client_key = NULL;
-#elif defined WITH_CA_BI
-	atiny_params->security_type = CLOUD_SECURITY_TYPE_CA_BI;
+#if defined WITH_CA
+	atiny_params->security_type = CLOUD_SECURITY_TYPE_CA;
 	atiny_params->u.ca.ca_crt = MQTT_TEST_CA_CRT;
 	atiny_params->u.ca.client_crt = MQTT_TEST_CLI_CRT;
 	atiny_params->u.ca.client_key = MQTT_TEST_CLI_KEY;
@@ -478,7 +456,7 @@ void* agent_tiny_entry(void *param)
         return NULL;
     }
 
-    //uwRet = creat_report_task();
+    uwRet = creat_report_task();
     if(0 != uwRet)
     {
         return NULL;

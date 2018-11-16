@@ -58,7 +58,7 @@
 // TODO
 #endif
 
-#define SOCKET_DEBUG
+//#define SOCKET_DEBUG
 
 #if defined(SOCKET_DEBUG)
 #define SOCKET_LOG(fmt, ...) \

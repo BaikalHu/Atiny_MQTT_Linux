@@ -126,7 +126,7 @@ C_DEFS =  \
         -D ATINY_DEBUG \
         -D USE_MBED_TLS \
         -D WITH_DTLS  \
-        -D WITH_CA_BI \
+        -D WITH_CA \
         -D MBEDTLS_CONFIG_FILE=\"los_mbedtls_config_x509.h\" \
         -D LWIP_TIMEVAL_PRIVATE=0
 
@@ -198,7 +198,7 @@ LIBDIR =
 LDFLAGS = $(MCU) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
 # default action: build all
-all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
+all: $(BUILD_DIR)/$(TARGET).elf
 
 
 #######################################

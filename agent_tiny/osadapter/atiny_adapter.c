@@ -44,7 +44,7 @@
 
 
 #define ATINY_CNT_MAX_WAITTIME 0xFFFFFFFF
-#define LOG_BUF_SIZE (256)
+#define LOG_BUF_SIZE (1024)
 
 #if 0
 static uint64_t osKernelGetTickCount (void)

@@ -66,8 +66,7 @@ typedef enum cloud_security_type
 {
     CLOUD_SECURITY_TYPE_NONE,
     CLOUD_SECURITY_TYPE_PSK,
-    CLOUD_SECURITY_TYPE_CA_UNI,
-    CLOUD_SECURITY_TYPE_CA_BI,
+    CLOUD_SECURITY_TYPE_CA,
     CLOUD_SECURITY_TYPE_MAX
 }cloud_security_type_e;
 
